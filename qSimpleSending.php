@@ -52,13 +52,39 @@ if (!$query){
 }
 
 //$query->free();
+array_unshift($_POST, $date);
 
-echo $_POST['general_sex'];
-echo $date;
-echo $ClientiP;
+array_unshift($_POST, $ClientiP);
+
+$sql = "INSERT INTO testdatabase VALUES (";
+
+foreach($_POST as $cle => $element)
+{
+    if($cle == '0')
+        {  
+            $cle = 'general_ip';
+                $sql = $sql . "'" . $element . "',";
+
+}
+elseif ($cle == '1') {
+    $cle = 'general_date';
+        $sql = $sql . "'" . $element . "',";
+
+}
+    else{
+    $sql = $sql . "'" . $element . "',NULL)";
+    }
+}
+//echo $_POST['general_sex'];
+//echo $_POST[0];
+//echo $date;
+//echo $ClientiP;
+
+echo $sql;
+
+//$sql = "INSERT INTO testdatabase (general_ip, general_date, general_sex) VALUES ('$ClientiP', '$date', '{$_POST['general_sex']}')";
 
 
-$sql = "INSERT INTO testdatabase (general_ip, general_date, general_sex) VALUES ('$ClientiP', '$date', '{$_POST['general_sex']}')";
 
 $query = mysqli_query($conn, $sql);
 if (!$query){  
