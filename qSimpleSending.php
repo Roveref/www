@@ -1,105 +1,104 @@
-<?php 
+<?php
 
-    function getIP() {
+function getIP()
+    {
     $ip = $_SERVER['SERVER_ADDR'];
-
-    if (PHP_OS == 'WINNT'){
+    if (PHP_OS == 'WINNT')
+        {
         $ip = getHostByName(getHostName());
-    }
-
-    if (PHP_OS == 'Linux'){
-        $command="/sbin/ifconfig";
-        exec($command, $output);
-        // var_dump($output);
-        $pattern = '/inet addr:?([^ ]+)/';
-
-        $ip = array();
-        foreach ($output as $key => $subject) {
-            $result = preg_match_all($pattern, $subject, $subpattern);
-            if ($result == 1) {
-                if ($subpattern[1][0] != "127.0.0.1")
-                $ip = $subpattern[1][0];
-            }
-        //var_dump($subpattern);
         }
-    }
+
+    if (PHP_OS == 'Linux')
+        {
+        $command = "/sbin/ifconfig";
+        exec($command, $output);
+
+        // var_dump($output);
+
+        $pattern = '/inet addr:?([^ ]+)/';
+        $ip = array();
+        foreach($output as $key => $subject)
+            {
+            $result = preg_match_all($pattern, $subject, $subpattern);
+            if ($result == 1)
+                {
+                if ($subpattern[1][0] != "127.0.0.1") $ip = $subpattern[1][0];
+                }
+            }
+        }
+
     return $ip;
-}
+    }
 
 $ClientiP = getIP();
-
 $server = "localhost";
-
 $date = date('Y-m-d H:i:s');
-
-$options = array("UID" => "root",  "PWD" => "password29", "DB" => "questionnaire");
-
+$options = array(
+    "UID" => "root",
+    "PWD" => "password29",
+    "DB" => "questionnaire"
+);
 echo "<p>Trying to access the database...</p>";
+$conn = mysqli_connect($server, "root", "password29", "questionnaire");
 
-$conn = mysqli_connect($server, "root", "password29","questionnaire");
-
-if (!$conn) 
-	die("<pre>".print_r(mysqli_connect_error(), true));
-
+if (!$conn) die("<pre>" . print_r(mysqli_connect_error() , true));
 echo "<p>Connection established.</p>";
 
-$sql = "SELECT * FROM testdatabase";
+$sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'questionnaire' AND table_name = 'testdatabase'";
 
 $query = mysqli_query($conn, $sql);
 
-if (!$query){  
-	exit("<pre>".print_r(mysqli_error($query), true));
-}
+$assoc = mysqli_fetch_assoc($query);
 
-//$query->free();
-array_unshift($_POST, $date);
+$numberColumns = $assoc['COUNT(*)'];
 
-array_unshift($_POST, $ClientiP);
+$sql = "SELECT * FROM testdatabase";
+$query = mysqli_query($conn, $sql);
 
-$sql = "INSERT INTO testdatabase VALUES (";
-
-foreach($_POST as $cle => $element)
-{
-    if($cle == '0')
-        {  
-            $cle = 'general_ip';
-                $sql = $sql . "'" . $element . "',";
-
-}
-elseif ($cle == '1') {
-    $cle = 'general_date';
-        $sql = $sql . "'" . $element . "',";
-
-}
-    else{
-    $sql = $sql . "'" . $element . "',NULL)";
+if (!$query)
+    {
+    exit("<pre>" . print_r(mysqli_error($query) , true));
     }
-}
-//echo $_POST['general_sex'];
-//echo $_POST[0];
-//echo $date;
-//echo $ClientiP;
+
+array_unshift($_POST, $date);
+array_unshift($_POST, $ClientiP);
+$sql = "INSERT INTO testdatabase VALUES (";
+$last_key = end(array_keys($_POST));
+
+foreach($_POST as $key => $element)
+    {
+    if ($key == '0')
+        {
+        //$key = 'general_ip';
+        $sql = $sql . "'" . $element . "',";
+        }
+    elseif ($key == '1')
+        {
+        //$key = 'general_date';
+        $sql = $sql . "'" . $element . "',";
+        }
+    elseif ($key == $last_key)
+        {
+        $sql = $sql . "'" . $element . "',NULL)";
+        }
+      else
+        {
+        $sql = $sql . "'" . $element . "',";
+        }
+    }
 
 echo $sql;
-
-//$sql = "INSERT INTO testdatabase (general_ip, general_date, general_sex) VALUES ('$ClientiP', '$date', '{$_POST['general_sex']}')";
-
-
-
 $query = mysqli_query($conn, $sql);
-if (!$query){  
-    exit("<pre>".print_r(mysqli_error($query), true));
-}
-else
-{
-		echo "<p>Results of the questionnaire added successfully to the database.</p>";
-}
 
-//mysqli_stmt($query);
+if (!$query)
+    {
+    exit("<pre>" . print_r(mysqli_error($query) , true));
+    }
+  else
+    {
+    echo "<p>Results of the questionnaire added successfully to the database.</p>";
+    }
 
 mysqli_close($conn);
-
 echo "<p>Connection closed.</p>";
-
-
 ?>

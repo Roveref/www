@@ -43,85 +43,104 @@ if (!$conn)
 
 echo "<p>Connection established.</p>";
 
+$sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'questionnaire' AND table_name = 'general_information'";
+$query = mysqli_query($conn, $sql);
+$assoc = mysqli_fetch_assoc($query);
+$numberColumnsGI = $assoc['COUNT(*)'];
+echo $numberColumnsGI;
+$sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'questionnaire' AND table_name = 'mechanicalpen'";
+$query = mysqli_query($conn, $sql);
+$assoc = mysqli_fetch_assoc($query);
+$numberColumnsMP = $assoc['COUNT(*)'];
+echo $numberColumnsMP;
+$sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'questionnaire' AND table_name = 'jewel'";
+$query = mysqli_query($conn, $sql);
+$assoc = mysqli_fetch_assoc($query);
+$numberColumnsJW = $assoc['COUNT(*)'];
+echo $numberColumnsJW;
+
 $sql = "SELECT * FROM general_information";
-
 $query = mysqli_query($conn, $sql);
 
-if (!$query){  
-    exit("<pre>".print_r(mysqli_error($query), true));
-}
+if (!$query)
+    {
+    exit("<pre>" . print_r(mysqli_error($query) , true));
+    }
 
-//$query->free();
+array_unshift($_POST, $date);
+array_unshift($_POST, $ClientiP);
+$sqlGI = "INSERT INTO general_information VALUES (";
+$sqlMP = "INSERT INTO mechanicalpen VALUES (";
+$sqlJW = "INSERT INTO jewel VALUES (";
 
-echo "test";
+echo $sqlGI;
+echo $sqlMP;
+echo $sqlJW;
 
-$sql = "INSERT INTO general_information (Ip,
-datecompletion, 
-sex,
-age,
-country,
-city,
-newspaper,
-newspaper_support,
-newspaper_section,
-radio,
-radio_support,
-radio_section,
-television,
-television_support,
-television_section,
-magazine,
-magazine_support,
-magazine_section,
-internet,
-internet_support,
-internet_section,
-cinema,
-cinema_support,
-cinema_section,
-videogame,
-videogame_support,
-videogame_section, 
-language, 
-mainlanguage,
-ratiolanguage1, 
-ratiolanguage2, 
-mostdelightful
-) VALUES ('$ClientiP',
-'$date', 
-'{$_POST['general_sex']}',
-'{$_POST['general_age']}',
-'{$_POST['general_country']}',
-'{$_POST['general_city']}',
-'{$_POST['general_newspaper']}',
-'{$_POST['general_newspaper_support']}',
-'{$_POST['general_newspaper_section']}',
-'{$_POST['general_radio']}',
-'{$_POST['general_radio_support']}',
-'{$_POST['general_radio_section']}',
-'{$_POST['general_television']}',
-'{$_POST['general_television_support']}',
-'{$_POST['general_television_section']}',
-'{$_POST['general_magazine']}',
-'{$_POST['general_magazine_support']}',
-'{$_POST['general_magazine_section']}',
-'{$_POST['general_internet']}',
-'{$_POST['general_internet_support']}',
-'{$_POST['general_internet_section']}',
-'{$_POST['general_cinema']}',
-'{$_POST['general_cinema_support']}',
-'{$_POST['general_cinema_section']}',
-'{$_POST['general_videogame']}',
-'{$_POST['general_videogame_support']}',
-'{$_POST['general_videogame_section']}',
-'{$_POST['general_language']}',
-'{$_POST['general_mainlanguage']}',
-'{$_POST['general_ratiolanguage1']}',
-'{$_POST['general_ratiolanguage2']}',
-'{$_POST['general_mostdelightful']}'
-)";
+$last_key = end(array_keys($_POST));
 
-$query = mysqli_query($conn, $sql);
+echo $last_key;
+
+foreach($_POST as $key => $element)
+    {
+        
+//echo '<p>' . $var . '</p>';
+if($key <= $numberColumnsGI-2) 
+    {
+
+    if ($key != $last_key AND $key != $numberColumnsGI-2)
+        {
+        $sqlGI = $sqlGI . "'" . $element . "',";
+        }
+    else
+        {
+        $sqlGI = $sqlGI . "'" . $element . "',NULL)";
+        }
+    }
+if($key > $numberColumnsGI-2 AND $key <= $numberColumnsGI+$numberColumnsMP-5) 
+    {
+
+            if ($key != $last_key AND $key != $numberColumnsGI-1 AND $key != $numberColumnsGI+$numberColumnsMP-5)
+        {
+        $sqlMP = $sqlMP . "'" . $element . "',";
+        }
+        elseif($key == $numberColumnsGI-1)
+        {
+        $sqlMP = $sqlMP . "'" . $_POST['0'] . "'," . $_POST['1'] . "',";
+        }
+        elseif($key == $numberColumnsGI+$numberColumnsMP-5)
+        {
+        $sqlMP = $sqlMP . "'" . $element . "',NULL)";
+        }
+    }
+    if($key > $numberColumnsGI+$numberColumnsMP-5) 
+    {
+        $var = $numberColumnsGI+$numberColumnsMP-4;
+        echo $key;
+        echo $var;
+            if ($key != $last_key AND $key != $numberColumnsGI+$numberColumnsMP-4)
+        {
+        $sqlJW = $sqlJW . "'" . $element . "',";
+        }
+            elseif($key == $numberColumnsGI+$numberColumnsMP-4)
+        {
+            echo 'yes';
+        $sqlJW = $sqlJW . "'" . $_POST['0'] . "'," . $_POST['1'] . "',";
+        }
+        elseif($key == $last_key)
+        {
+        $sqlJW = $sqlJW . "'" . $element . "',NULL)";
+        }
+    }
+    }
+
+
+echo '<p>' . $sqlGI . '</p>';
+echo '<p>' . $sqlMP . '</p>';
+echo '<p>' . $sqlJW . '</p>';
+
+$query = mysqli_query($conn, $sqlGI);
+
 if (!$query){  
     exit("<pre>".print_r(mysqli_error($query), true));
 }
@@ -130,182 +149,24 @@ else
         echo "<p>Results of the general part added successfully to the database.</p>";
 }
 
-$sql = "SELECT * FROM mechanicalpen";
+$query = mysqli_query($conn, $sqlMP);
 
-$query = mysqli_query($conn, $sql);
-
-if (!$query){  
-    exit("<pre>".print_r(mysqli_error($query), true));
-}
-
-$sql = "INSERT INTO mechanicalpen (Ip,
-datecompletion, 
-frequency,
-newspaper,
-newspaper_support,
-radio,
-radio_support,
-television,
-television_support,
-magazine,
-magazine_support,
-internet,
-internet_support,
-cinema,
-cinema_support,
-videogame,
-videogame_support,
-wordofmouth,
-wordofmouth_support,
-property1,
-property2,
-property3,
-expectation1,
-expectation2,
-expectation3,
-comfortable, 
-origin,
-production, 
-ecology,
-buyinternet,
-reason,
-timeacceptable,
-elasticity,
-personalization,
-needs
-) VALUES ('$ClientiP',
-'$date', 
-'{$_POST['mechanicalpen_frequency']}',
-'{$_POST['mechanicalpen_newspaper']}',
-'{$_POST['mechanicalpen_newspaper_support']}',
-'{$_POST['mechanicalpen_radio']}',
-'{$_POST['mechanicalpen_radio_support']}',
-'{$_POST['mechanicalpen_television']}',
-'{$_POST['mechanicalpen_television_support']}',
-'{$_POST['mechanicalpen_magazine']}',
-'{$_POST['mechanicalpen_magazine_support']}',
-'{$_POST['mechanicalpen_internet']}',
-'{$_POST['mechanicalpen_internet_support']}',
-'{$_POST['mechanicalpen_cinema']}',
-'{$_POST['mechanicalpen_cinema_support']}',
-'{$_POST['mechanicalpen_videogame']}',
-'{$_POST['mechanicalpen_videogame_support']}',
-'{$_POST['mechanicalpen_wordofmouth']}',
-'{$_POST['mechanicalpen_wordofmouth_support']}',
-'{$_POST['mechanicalpen_property1']}',
-'{$_POST['mechanicalpen_property2']}',
-'{$_POST['mechanicalpen_property3']}',
-'{$_POST['mechanicalpen_expectation1']}',
-'{$_POST['mechanicalpen_expectation2']}',
-'{$_POST['mechanicalpen_expectation3']}',
-'{$_POST['mechanicalpen_checkbox_comfortable']}',
-'{$_POST['mechanicalpen_checkbox_origin']}',
-'{$_POST['mechanicalpen_checkbox_production']}',
-'{$_POST['mechanicalpen_checkbox_ecology']}',
-'{$_POST['mechanicalpen_buyinternet']}',
-'{$_POST['mechanicalpen_notbuyinternet_reason']}',
-'{$_POST['mechanicalpen_delivery_timeacceptable']}',
-'{$_POST['mechanicalpen_checkbox_elasticity']}',
-'{$_POST['mechanicalpen_checkbox_personalization']}',
-'{$_POST['mechanicalpen_checkbox_needs']}'
-)";
-
-$query = mysqli_query($conn, $sql);
 if (!$query){  
     exit("<pre>".print_r(mysqli_error($query), true));
 }
 else
 {
-        echo "<p>Results of the mechinal pen part added successfully to the database.</p>";
+        echo "<p>Results of the mechical pen part added successfully to the database.</p>";
 }
 
-$sql = "SELECT * FROM jewel";
+$query = mysqli_query($conn, $sqlJW);
 
-$query = mysqli_query($conn, $sql);
-
-if (!$query){  
-    exit("<pre>".print_r(mysqli_error($query), true));
-}
-
-$sql = "INSERT INTO jewel (Ip,
-datecompletion, 
-frequency,
-newspaper,
-newspaper_support,
-radio,
-radio_support,
-television,
-television_support,
-magazine,
-magazine_support,
-internet,
-internet_support,
-cinema,
-cinema_support,
-videogame,
-videogame_support,
-wordofmouth,
-wordofmouth_support,
-property1,
-property2,
-property3,
-expectation1,
-expectation2,
-expectation3,
-comfortable, 
-origin,
-production, 
-ecology,
-buyinternet,
-reason,
-timeacceptable,
-elasticity,
-personalization,
-needs
-) VALUES ('$ClientiP',
-'$date', 
-'{$_POST['intermediatejewelry_frequency']}',
-'{$_POST['intermediatejewelry_newspaper']}',
-'{$_POST['intermediatejewelry_newspaper_support']}',
-'{$_POST['intermediatejewelry_radio']}',
-'{$_POST['intermediatejewelry_radio_support']}',
-'{$_POST['intermediatejewelry_television']}',
-'{$_POST['intermediatejewelry_television_support']}',
-'{$_POST['intermediatejewelry_magazine']}',
-'{$_POST['intermediatejewelry_magazine_support']}',
-'{$_POST['intermediatejewelry_internet']}',
-'{$_POST['intermediatejewelry_internet_support']}',
-'{$_POST['intermediatejewelry_cinema']}',
-'{$_POST['intermediatejewelry_cinema_support']}',
-'{$_POST['intermediatejewelry_videogame']}',
-'{$_POST['intermediatejewelry_videogame_support']}',
-'{$_POST['intermediatejewelry_wordofmouth']}',
-'{$_POST['intermediatejewelry_wordofmouth_support']}',
-'{$_POST['intermediatejewelry_property1']}',
-'{$_POST['intermediatejewelry_property2']}',
-'{$_POST['intermediatejewelry_property3']}',
-'{$_POST['intermediatejewelry_expectation1']}',
-'{$_POST['intermediatejewelry_expectation2']}',
-'{$_POST['intermediatejewelry_expectation3']}',
-'{$_POST['intermediatejewelry_checkbox_luxurious']}',
-'{$_POST['intermediatejewelry_checkbox_origin']}',
-'{$_POST['intermediatejewelry_checkbox_production']}',
-'{$_POST['intermediatejewelry_checkbox_ecology']}',
-'{$_POST['intermediatejewelry_buyinternet']}',
-'{$_POST['intermediatejewelry_notbuyinternet_reason']}',
-'{$_POST['intermediatejewelry_delivery_timeacceptable']}',
-'{$_POST['intermediatejewelry_checkbox_elasticity']}',
-'{$_POST['intermediatejewelry_checkbox_personalization']}',
-'{$_POST['intermediatejewelry_checkbox_needs']}'
-)";
-
-$query = mysqli_query($conn, $sql);
 if (!$query){  
     exit("<pre>".print_r(mysqli_error($query), true));
 }
 else
 {
-        echo "<p>Results of the jewel part added successfully to the database.</p>";
+        echo "<p>Results of the intermediate jewel part added successfully to the database.</p>";
 }
 
 mysqli_close($conn);
