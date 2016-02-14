@@ -98,11 +98,15 @@
                   <p>According to your own emotions, what kind of product is the most delightful ?</p>
                   <p><input type="text" name=<?php phpInHTML("mostdelightful","general_information");?> id="general_mostdelightful" onblur="verifText(this)" /></p>
                </div>
+               </article>
+         </section>
+                                 <?php include("qFullPrepareProduct.php"); ?>
+
                <div> 
                   <input type="submit" id="submitbutton" value="Submit all" />
                </div>
-            </article>
-         </section>
+                           </article>
+</section>
          <article>
             <p>Rovere Francois – 37-156871 東京大学大学院工学系研究科機械工学専攻設計工学研究室</p>
          </article>

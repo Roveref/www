@@ -64,25 +64,47 @@ function disconnectDatabase($connection)
     echo "<p>Connection closed.</p>";
     }
 
-function registerInTable($table, $data, $date, $clientIP, $numberColumnsGI, $connection)
+    function registerInTable($table, $data, $date, $clientIP, $numberColumnsGI, $connection)
     {
-    array_unshift($data, $date);
-    array_unshift($data, $clientIP);
-    $sql = "INSERT INTO $table VALUES (";
-    $last_key = end(array_keys($data));
+    $sql = "INSERT INTO $table (Ip, datecompletion,";
+    if($table == "general_information")
+    $last_key = "general_information_mostdelightful";
+    if($table == "mechanicalpen")
+    $last_key = "mechanicalpen_needs";
     foreach($data as $key => $element)
         {
-        if ($key <= $numberColumnsGI - 2)
-            {
-            if ($key != $last_key AND $key != $numberColumnsGI - 2)
+            if(substr($key, 0, strlen($table))==$table)
+                {
+            $lengthTable = strlen($table);
+            $newKey = substr($key, $lengthTable+1);
+
+            if($key != $last_key)
+                {
+                $sql = $sql . "" . $newKey . ",";
+                }
+              else
+                {
+                $sql = $sql . "" . $newKey . ",id)";
+                break 1;
+                }
+                }
+        }
+                $sql = $sql . " VALUES " . "('$clientIP','$date',";
+
+        foreach($data as $key => $element)
+        {
+            if(substr($key, 0, strlen($table))==$table)
+                {
+            if($key != $last_key)
                 {
                 $sql = $sql . "'" . $element . "',";
                 }
               else
                 {
                 $sql = $sql . "'" . $element . "',NULL)";
+                break 1;
                 }
-            }
+                }
         }
 
     echo '<p>' . $sql . '</p>';
@@ -93,49 +115,13 @@ function registerInTable($table, $data, $date, $clientIP, $numberColumnsGI, $con
         }
       else
         {
-        echo "<p>Results of the general part added successfully to the database.</p>";
-        }
-    }
-
-    function registerInTable2($table, $data, $date, $clientIP, $numberColumnsGI, $connection)
-    {
-    array_unshift($data, $date);
-    array_unshift($data, $clientIP);
-    $sql = "INSERT INTO $table (";
-    $last_key = end(array_keys($data));
-    foreach($data as $key => $element)
-        {
-            $lengthTable = strlen($table);
-            $lengthKey = strlen($key);
-            $newKey = substr($key, $lengthKey-$lengthTable,$lengthKey);
-                echo '<p>' . $newKey . '</p>';
-
-            if($key != $lastkey)
-                {
-                $sql = $sql . "" . $newKey . "',";
-                }
-              else
-                {
-                $sql = $sql . "" . $newKey . ")";
-                }
-            }
-        }
-
-    echo '<p>' . $sql . '</p>';
-    $query = mysqli_query($connection, $sql);
-    if (!$query)
-        {
-        exit("<pre>" . print_r(mysqli_error($query) , true));
-        }
-      else
-        {
-        echo "<p>Results of the general part added successfully to the database.</p>";
+        echo "<p>Results of the part $table added successfully to the database.</p>";
         }
     }
 
 function phpInHTML($field, $product)
     {
-        echo "$product_$field";
+        echo $product . '_' . $field;
     }
 
 ?>
